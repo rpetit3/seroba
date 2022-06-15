@@ -32,6 +32,7 @@ class Serotyping:
         self.meta_data_dict = ref_db_creator.RefDbCreator._read_meta_data_tsv(self.meta_data)
         self.clean = clean
         self.cov = cov/100.0
+        os.makedirs(self.prefix)
 
     @staticmethod
     def _serotype_2_cluster(cd_cluster):
@@ -51,7 +52,7 @@ class Serotyping:
 
     def _run_kmc(self):
     #kmc on fw_read
-        temp_dir = tempfile.mkdtemp(prefix = 'temp.kmc', dir=os.getcwd())
+        temp_dir = tempfile.mkdtemp(prefix = 'temp.kmc', dir=self.prefix)
         kmer_db_list = os.listdir(self.kmer_db)
         kmer_count = self.cov
         max_kmer_count = 0.0
@@ -82,7 +83,6 @@ class Serotyping:
             self.best_serotype = 'NT'
 
     def _run_ariba_on_cluster(self,cluster):
-        os.makedirs(self.prefix)
         ref_dir = os.path.join(self.ariba_cluster_db ,self.cluster_serotype_dict[cluster][0]+'/','ref')
         command = ['ariba run ',ref_dir,self.fw_read,self.bw_read,os.path.join(self.prefix,'ref')]
         os.system(' '.join(command))
@@ -255,7 +255,7 @@ class Serotyping:
         sub_dict = {'genes':[],'pseudo':[],'allele':[],'snps':[]}
         relevant_genetic_elements = dict.fromkeys(serotypes, sub_dict)
         allel_snp = serogroup_dict
-        tmpdir = tempfile.mkdtemp(prefix = 'temp.nucmer', dir=os.getcwd())
+        tmpdir = tempfile.mkdtemp(prefix = 'temp.nucmer', dir=prefix)
         gene_ref = serogroup_fasta
         pymummer.nucmer.Runner(
             gene_ref,
